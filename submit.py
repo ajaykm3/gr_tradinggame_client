@@ -10,4 +10,4 @@ if not TEAM_NAME or not PASSWORD or not SERVER:
 client = Client(TEAM_NAME, password=PASSWORD, server=SERVER)
 exec(open('solution.py').read())
 client.test(play)
-client.submit(play)
+client.submit(open('solution.py').read())
