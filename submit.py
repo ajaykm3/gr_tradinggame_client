@@ -8,6 +8,6 @@ if TEAM_NAME or not PASSWORD or not SERVER:
 
 # Password is set on first submission and required for all future submissions.
 # Choose any password you like on your first submit. Don't forget it.
-client = Client('YourTeamName', password='YourPassword', server='ec2-3-254-122-192.eu-west-1.compute.amazonaws.com:5000')
+client = Client(TEAM_NAME, password=PASSWORD, server=SERVER)
 client.test(play)
 client.submit(play)
