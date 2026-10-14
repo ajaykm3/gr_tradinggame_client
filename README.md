@@ -38,7 +38,9 @@ Your function is called every round (including while locked out). Returning `Tru
 uv run python test.py
 ```
 
-Checks your function handles edge cases and runs fast enough.
+Checks your function handles edge cases and runs fast enough, including a game-like check (2000 rounds, 23 other teams) that must average under 15 ms per round. On the server, a team that uses more than 60 s in one game is benched for the rest of that game.
+
+The server has numpy, pandas and the Python standard library. Other packages are not available there, even if you install them locally.
 
 ### 3. Submit
 

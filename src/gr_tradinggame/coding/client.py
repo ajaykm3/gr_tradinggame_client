@@ -10,7 +10,10 @@ from .blackbox import Plackbox, Blackbox
 
 
 class Client:
-    def __init__(self, team_name, password, server=None, timeout=0.1):
+    # game_timeout: average seconds per call allowed in a realistic game. The server benches a team
+    # that uses over 60 s in a 2,000-round game on a CPU slower than a typical laptop, so 15 ms here
+    # leaves a margin under that.
+    def __init__(self, team_name, password, server=None, timeout=0.1, game_timeout=0.015):
         self.team_name = team_name
         self.password = password
         if server:
@@ -20,6 +23,7 @@ class Client:
         else:
             self.url = None
         self.timeout = timeout
+        self.game_timeout = game_timeout
 
     def test(self, source_or_function, verbose=False, strict=False, allow_state=True):
         return self._submit(source_or_function, strict=strict, submit=False, allow_state=allow_state, verbose=verbose)
@@ -69,6 +73,25 @@ class Client:
                     raise
                 if j == 0 and verbose:
                     print(f'\tSuccess -- returned {a}')
+        # Speed in conditions like a real game: consecutive rounds, T=2000, lockout 15, 23 other teams.
+        n_game_rounds = 300
+        locked_until = 0
+        tic = timeit.default_timer()
+        for t in range(1, n_game_rounds + 1):
+            scores = [] if t == 1 else [(10 * t * random.random(), random.random() < 0.3) for _ in range(23)]
+            args = (random.expovariate(0.1), 15, t, 2000, 10 * t / 15, scores, t <= locked_until)
+            try:
+                a = foo(*args)
+            except Exception:
+                print(f'Game-like input {args}')
+                raise
+            if a and t > locked_until:
+                locked_until = t + 15
+            if timeit.default_timer() - tic > self.game_timeout * n_game_rounds:
+                break
+        per_call = (timeit.default_timer() - tic) / t
+        if per_call > self.game_timeout:
+            raise Exception(f"""Your code is too slow in a game-like test (2000 rounds, 23 other teams): it should take under {self.game_timeout * 1000:.0f} ms per round on average but took {per_call * 1000:.1f} ms. The server stops calling a team for the rest of a game once it has used 60 s.""")
         tic = timeit.default_timer()
         for j in range(1_000):
             T = int(1_000_000 * random.random())

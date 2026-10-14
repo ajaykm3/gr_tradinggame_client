@@ -20,7 +20,7 @@ def play(reward: float, lockout: int, t: int, T: int, your_score: float, other_s
 - `is_locked` (`bool`): True if the player is currently in lockout at round $t$.
 
 ### 2. Testing & Submissions
-- Run local unit tests: `uv run python test.py`.
+- Run local unit tests: `uv run python test.py`. They include a game-like speed check (T=2000, lockout 15, 23 other teams, at most 15 ms per call on average), kept below the server's per-team budget of 60 s per game.
 - Submit to server: `uv run python submit.py`.
 - Configuration (team name, password, server endpoint) is stored in `config.py`. Keep the checked-in team name and password empty; users fill them in for their submissions.
 - Current EC2 submission endpoint: `ec2-54-217-141-255.eu-west-1.compute.amazonaws.com:5000`.
