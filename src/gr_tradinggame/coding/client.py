@@ -4,6 +4,7 @@ import random
 import requests
 from requests.auth import HTTPBasicAuth
 import cloudpickle as pickle
+import numpy as np
 import timeit
 
 from .blackbox import Plackbox, Blackbox
@@ -62,7 +63,7 @@ class Client:
                         if a != outputs[i] and not allow_state:
                             print(test_str)
                             raise Exception(f"""You previously returned `{outputs[i]}` and are now returning `{a}`. If this is intentional, set `allow_state=True`""")
-                        elif not isinstance(a, bool):
+                        elif not isinstance(a, (bool, np.bool_)):
                             print(test_str)
                             raise Exception(f"""You should return `False` or `True` but you returned `{a}` of type {type(a)}""")
                         elif strict and hint is not None and a != hint[0]:
@@ -94,7 +95,7 @@ class Client:
             raise Exception(f"""Your code is too slow in a game-like test (2000 rounds, 23 other teams): it should take under {self.game_timeout * 1000:.0f} ms per round on average but took {per_call * 1000:.1f} ms. The server stops calling a team for the rest of a game once it has used 60 s.""")
         tic = timeit.default_timer()
         for j in range(1_000):
-            T = int(1_000_000 * random.random())
+            T = random.randint(1, 5000)  # games are 2000 rounds; huge T only slowed down code that sets up per T
             t = int(random.random() * T) + 1
             lockout = int(10 * random.random())
             reward = 100 * random.random()
@@ -111,7 +112,7 @@ class Client:
                 print(f'Random input {args}')
                 raise
             else:
-                if not isinstance(a, bool):
+                if not isinstance(a, (bool, np.bool_)):
                     print(f'Random input {args}')
                     raise Exception(f"""You should return `False` or `True` but returned `{a}` of type {type(a)}""")
             toc = timeit.default_timer()
